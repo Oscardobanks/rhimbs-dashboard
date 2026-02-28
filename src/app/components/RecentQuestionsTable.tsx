@@ -1,0 +1,141 @@
+"use client"
+import { auth, db } from '@/firebase/firebase';
+import { getDocs, collection, query, where, CollectionReference, Query } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react'
+import { FaArrowRight } from 'react-icons/fa';
+import BeatLoader from 'react-spinners/BeatLoader';
+import { UserRole } from '../services/permissions';
+
+export interface Question {
+    id: string;
+    course: string;
+    lecturer: string;
+    department: string;
+    questionsUrl: string;
+    uploadDate: string;
+}
+
+interface RecentQuestionsTableProps {
+    userRole: UserRole | null;
+}
+
+const RecentQuestionsTable = ({ userRole }: RecentQuestionsTableProps) => {
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            setLoading(true);
+            try {
+                const currentUser = auth.currentUser;
+                const isAdminOrPresident = userRole === UserRole.ADMIN || userRole === UserRole.PRESIDENT;
+
+                let queryRef: Query | CollectionReference = collection(db, "Questions");
+                if (!isAdminOrPresident && currentUser) {
+                    queryRef = query(collection(db, "Questions"), where("userId", "==", currentUser.uid));
+                }
+
+
+                const querySnapshot = await getDocs(queryRef);
+                const questionData = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+
+                    // Convert Firebase timestamp to formatted date string
+                    const date = new Date(data.uploadDate);
+                    const formattedDate = date.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+
+                    return {
+                        id: doc.id,
+                        course: data.course,
+                        lecturer: data.lecturer,
+                        department: data.department,
+                        questionsUrl: data.questionsUrl,
+                        uploadDate: formattedDate
+                    };
+                });
+                setQuestions(questionData.slice(0, 5));
+            } catch (error: Error | any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchQuestions();
+    }, [userRole]);
+
+    return (
+        <div>
+            <div className="border-2 border-teal-700 py-4 md:px-6 px-4 rounded-lg">
+                <div className="flex flex-wrap gap-5 justify-between items-center w-full md:p-4">
+                    <h1 className="text-2xl font-bold text-teal-800">Recent Questions</h1>
+                    <a href="/questions">
+                        <button className="flex gap-2 items-center bg-teal-400 hover:bg-teal-500 text-white px-5 py-2 rounded-md">View All <span>
+                            <FaArrowRight />
+                        </span></button>
+                    </a>
+                </div>
+                <div className="overflow-x-auto flex flex-col scrollbar-thin scrollbar-thumb-teal-500 scrollbar-track-teal-100">
+                    <div className="inline-block min-w-full py-2">
+                        <table className="min-w-full text-left text-sm font-light shadow">
+                            <thead className="border-b font-medium bg-teal-600 text-white rounded-md">
+                                <tr>
+                                    <th scope="col" className="px-6 py-4">Course</th>
+                                    <th scope="col" className="px-6 py-4">Lecturer</th>
+                                    <th scope="col" className="px-6 py-4">Department</th>
+                                    <th scope="col" className="px-6 py-4">Upload Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {!loading && !error && questions.map((question) => (
+                                    <tr
+                                        key={question.id}
+                                        className="border-b transition duration-300 ease-in-out hover:bg-teal-100">
+                                        <td className="whitespace-nowrap px-6 py-4 font-medium">{question.course}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">{question.lecturer}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">{question.department}</td>
+                                        <td className="whitespace-nowrap px-6 py-4">{question.uploadDate}</td>
+                                    </tr>
+                                ))}
+                                {loading ?
+                                    (
+                                        <tr className="h-20">
+                                            <td colSpan={12}>
+                                                <div className="flex items-center justify-center">
+                                                    <BeatLoader
+                                                        color="teal"
+                                                        loading={loading}
+                                                        aria-label="Loading Spinner"
+                                                        data-testid="loader"
+                                                    />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        error && (
+                                            <tr className="text-center p-5 font-bold h-20">
+                                                <td colSpan={12} className="text-gray-800 text-lg">We Faced Some Incoveniences. Please try again later.</td>
+                                                <td colSpan={12} className="text-red-500">{error}</td>
+                                            </tr>
+                                        ))}
+
+                                {questions.length === 0 && !loading && (
+                                    <tr className="text-center p-5 font-bold h-20">
+                                        <td colSpan={12} className="text-gray-800 text-lg">No Questions Available</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default RecentQuestionsTable
