@@ -1,3 +1,5 @@
+"use client"
+import React from 'react';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebase/firebase';
 import CryptoJS from 'crypto-js';
@@ -25,20 +27,32 @@ const DeletePopup: React.FC<DeletePopupProps> = ({ onDelete, onCancel, rowData, 
         publicId = rowData.questionsUrl.split('/').pop().split('.')[0];
       }
 
+      // Read env vars and validate (guard against undefined so FormData.append always gets strings)
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+      const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET;
+
+      if (!cloudName || !apiKey || !apiSecret) {
+        console.error('Missing Cloudinary environment variables. Deletion from Cloudinary skipped.');
+        // We already deleted the Firestore doc; inform caller and exit.
+        onDelete(rowData);
+        return;
+      }
+
       // Generate the signature
       const timestamp = Math.floor(Date.now() / 1000);
-      const signatureString = `public_id=${publicId}&timestamp=${timestamp}${process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET}`;
+      const signatureString = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
       const signature = CryptoJS.SHA1(signatureString).toString();
 
       // Delete the file from Cloudinary
       const formData = new FormData();
       formData.append('public_id', publicId);
-      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY);
+      formData.append('api_key', apiKey);
       formData.append('timestamp', timestamp.toString());
       formData.append('signature', signature);
 
       const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/destroy`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`,
         {
           method: "POST",
           body: formData,

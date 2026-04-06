@@ -113,7 +113,7 @@ const Dashboard = () => {
   return (
     <div>
       <DashboardLayout active="dashboard">
-        <div className="py-8 px-5 size-full bg-gray-50">
+        <div className="py-8 px-5 size-full bg-gray-50 text-black">
           <div className="flex gap-5 justify-between">
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl font-bold text-teal-900">Dashboard</h1>

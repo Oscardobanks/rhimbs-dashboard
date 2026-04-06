@@ -71,7 +71,7 @@ const RecentNotesTable = ({ userRole }: RecentNotesTableProps) => {
 
   return (
     <div>
-      <div className="border-2 border-teal-700 py-4 md:px-6 px-4 rounded-lg">
+      <div className="border-2 border-teal-700 py-4 md:px-6 px-4 rounded-lg text-black">
         <div className="flex flex-wrap gap-5 justify-between items-center w-full md:p-4">
           <h1 className="text-2xl font-bold text-teal-800">Recent Notes</h1>
           <a href="/notes">

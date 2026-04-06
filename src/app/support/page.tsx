@@ -141,7 +141,7 @@ const HelpPage = () => {
                             {faqItems.map((item, index) => (
                                 <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
                                     <button
-                                        className="w-full flex justify-between items-center p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+                                        className="w-full flex justify-between items-center p-4 text-left bg-gray-50 text-black hover:bg-gray-100 transition-colors"
                                         onClick={() => toggleItem(index)}
                                     >
                                         <span className="font-medium text-gray-800">{item.question}</span>

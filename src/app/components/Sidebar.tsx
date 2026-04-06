@@ -117,7 +117,7 @@ const Sidebar = ({ active }: SidebarProps) => {
 			<div className={`${(isTabletMid && open) ? "fixed w-64 h-screen z-[999] bg-teal-900 duration-500 ease-in-out" : "lg:block hidden duration-300 ease-out h-full"}`}>
 				<div className={`${open ? "xl:w-72 w-64 p-5" : "w-20 p-4"} bg-teal-900 h-screen pt-8 relative duration-300 ease-in-out`}>
 					{/* Toggle button sections */}
-					<div className={`absolute cursor-pointer -right-4 top-12 size-8 p-0.5 z-40 bg-zinc-50 border-teal-900 border-2 rounded-full text-xl flex items-center justify-center ${!open && "rotate-180"} transition-all ease-in-out duration-300`}
+					<div className={`absolute cursor-pointer -right-4 top-12 size-8 p-0.5 z-40 bg-zinc-50 text-black border-teal-900 border-2 rounded-full text-xl flex items-center justify-center ${!open && "rotate-180"} transition-all ease-in-out duration-300`}
 						onClick={() => setOpen(!open)}
 					>
 						{!open && isTabletMid ?

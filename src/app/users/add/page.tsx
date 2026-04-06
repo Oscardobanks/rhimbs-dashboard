@@ -8,7 +8,7 @@ const AddUser = () => {
   return (
     <div>
       <DashboardLayout active="users">
-        <div className="py-8 lg:px-8 px-5 lg:min-h-[91.8vh] min-h-[94vh] size-full bg-gray-50">
+        <div className="py-8 lg:px-8 px-5 lg:min-h-[91.8vh] min-h-[94vh] size-full bg-gray-50 text-black">
           <div className="flex gap-5 justify-between items-center">
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl font-bold text-teal-900">Add User</h1>

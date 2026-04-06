@@ -1,9 +1,9 @@
 'use client'
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Lottie from "lottie-react";
-import studyingAnimation from "@/../studying.json";
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useToast } from "../hooks/useToast";
 import { auth } from "../../firebase/firebase";
@@ -14,8 +14,18 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [animationData, setAnimationData] = useState<any>(null);
     const { showToast } = useToast();
     const router = useRouter();
+
+    useEffect(() => {
+        // Load the Lottie JSON at runtime (client-only) to avoid server-side module evaluation that references `document`
+        import('@/../studying.json')
+            .then((m) => setAnimationData((m as any).default ?? m))
+            .catch((err) => {
+                console.error('Failed to load animation JSON:', err);
+            });
+    }, []);
 
     const emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     const adminEmail = process.env.NEXT_DEFAULT_ADMIN_EMAIL
@@ -81,7 +91,7 @@ const Login = () => {
 
     return (
         <div>
-            <main className="flex justify-center items-center w-full min-h-screen bg-gray-50">
+            <main className="flex justify-center items-center w-full min-h-screen bg-gray-50 text-black">
                 <div className="relative w-full max-w-[90vw] md:h-[95vh] h-full md:my-0 my-8 bg-white rounded-xl shadow-lg">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-8 gap-5 size-full 2xl:p-8 p-4">
                         <div className="md:block hidden relative rounded-3xl bg-red-50 w-full h-full">
@@ -92,7 +102,7 @@ const Login = () => {
                                 <h1 className="2xl:text-4xl xl:text-3xl md:text-2xl font-bold mb-3 text-primary-600"> Inspiring the Next Generation</h1>
                                 <p className="xl:text-base text-sm font-semibold text-red-500">Dedicated to your success, dedicated to theirs.  Access the tools you need to make a difference.</p>
                                 <div className="xl:w-[45%] w-[50%] mx-auto mt-8">
-                                    <Lottie animationData={studyingAnimation} loop={false} />
+                                    {animationData && <Lottie animationData={animationData} loop={false} />}
                                 </div>
                             </div>
                         </div>
