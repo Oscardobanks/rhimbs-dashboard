@@ -42,3 +42,5 @@ next-env.d.ts
 
 # Firebase
 ./firebase/firebase.js
+.vercel
+.env*.local
